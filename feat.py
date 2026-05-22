@@ -49,6 +49,7 @@ class MeowFeatureGenerator(object):
             "ob_imb0_ma5",
             "ob_imb0_std12",
             "midpx_ret1_ma5",
+            "midpx_ret1_ma12",
             "midpx_ret1_std12",
             "midpx_ret1_std24",
             "spread_bps0_ma12",
@@ -147,6 +148,7 @@ class MeowFeatureGenerator(object):
         df["ob_imb0_ma5"] = self._rolling_mean(df, "ob_imb0", 5)
         df["ob_imb0_std12"] = self._rolling_std(df, "ob_imb0", 12)
         df["midpx_ret1_ma5"] = self._rolling_mean(df, "midpx_ret1", 5)
+        df["midpx_ret1_ma12"] = self._rolling_mean(df, "midpx_ret1", 12)
         df["midpx_ret1_std12"] = self._rolling_std(df, "midpx_ret1", 12)
         df["midpx_ret1_std24"] = self._rolling_std(df, "midpx_ret1", 24)
         df["spread_bps0_ma12"] = self._rolling_mean(df, "spread_bps0", 12)
