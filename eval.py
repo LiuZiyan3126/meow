@@ -16,3 +16,5 @@ class MeowEvaluator(object):
         r2 = 1 - ((ydf[self.predictionCol] - ydf[self.ycol]) ** 2).sum() / ydf[self.ycol].var() / ydf.shape[0]
         mse = ((ydf[self.predictionCol] - ydf[self.ycol]) ** 2).sum() / ydf.shape[0]
         log.inf("Meow evaluation summary: Pearson correlation={:.4f}, R2={:.5f}, MSE={:.2f}".format(pcor, r2, mse))
+        ydf[["forecast", "fret12"]].to_csv("predictions.csv", float_format="%.8f")
+        log.inf("Predictions saved to predictions.csv")

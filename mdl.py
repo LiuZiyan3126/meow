@@ -1,3 +1,4 @@
+import pickle
 import numpy as np
 import torch
 import torch.nn as nn
@@ -95,6 +96,10 @@ class MeowModel(object):
         self.model.load_state_dict(bestState)
         self.model.eval()
         log.inf("Done fitting: best val_loss={:.6f}, input_dim={}".format(bestValLoss, inputDim))
+        torch.save({"model_state": self.model.state_dict(), "input_dim": inputDim}, "model_weights.pt")
+        with open("scaler.pkl", "wb") as f:
+            pickle.dump(self.scaler, f)
+        log.inf("Model saved to model_weights.pt, scaler saved to scaler.pkl")
 
     def predict(self, xdf):
         X = self.scaler.transform(xdf.to_numpy().astype(np.float32))

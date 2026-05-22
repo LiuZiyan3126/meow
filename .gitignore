@@ -32,3 +32,4 @@ cache/
 checkpoints/
 *.cache
 *.tmp
+result.txt
