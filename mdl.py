@@ -101,6 +101,15 @@ class MeowModel(object):
             pickle.dump(self.scaler, f)
         log.inf("Model saved to model_weights.pt, scaler saved to scaler.pkl")
 
+    def load(self, weightsPath="model_weights.pt", scalerPath="scaler.pkl"):
+        checkpoint = torch.load(weightsPath, map_location=device, weights_only=False)
+        self.model = ResidualMLP(input_dim=checkpoint["input_dim"]).to(device)
+        self.model.load_state_dict(checkpoint["model_state"])
+        self.model.eval()
+        with open(scalerPath, "rb") as f:
+            self.scaler = pickle.load(f)
+        log.inf("Model loaded from {} and {}".format(weightsPath, scalerPath))
+
     def predict(self, xdf):
         X = self.scaler.transform(xdf.to_numpy().astype(np.float32))
         Xt = torch.tensor(X, dtype=torch.float32)
