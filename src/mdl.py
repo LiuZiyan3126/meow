@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from sklearn.preprocessing import StandardScaler
-from log import log
-from nn_model import ResidualMLP, device
+from src.log import log
+from src.nn_model import ResidualMLP, device
 
 
 class MeowModel(object):

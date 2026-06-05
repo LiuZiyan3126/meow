@@ -1,11 +1,11 @@
 import os
 import bisect
-from log import log
+from src.log import log
 
 
 class Calendar(object):
     def __init__(self):
-        calendarFile = os.path.join(os.path.dirname(__file__), "resources/calendar")
+        calendarFile = os.path.join(os.path.dirname(__file__), "..", "resources", "calendar")
         with open(calendarFile) as f:
             tokens = f.read().splitlines()
             self.tradingDays = sorted([int(x) for x in tokens])
