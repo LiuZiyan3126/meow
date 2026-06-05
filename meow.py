@@ -41,7 +41,7 @@ class MeowEngine(object):
 
 
 if __name__ == "__main__":
-    engine = MeowEngine(h5dir="<data_dir_path>", cacheDir=None)
+    engine = MeowEngine(h5dir="./archive", cacheDir=None)
     if os.path.exists("model_weights.pt") and os.path.exists("scaler.pkl"):
         log.inf("Found saved model, skipping training")
         engine.model.load("model_weights.pt", "scaler.pkl")
