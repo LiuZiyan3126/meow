@@ -13,13 +13,13 @@ $$fret12 = \frac{P_{t+12} - P_t}{P_t}$$
 ### 1.2 整体架构
 
 ```
-meow.py (MeowEngine)                    # 入口调度器
-  ├── tradingcalendar.py (Calendar)     # 交易日历
-  ├── dl.py (MeowDataLoader)            # HDF5 数据加载
-  ├── feat.py (MeowFeatureGenerator)    # 特征工程（60+ 特征）
-  ├── mdl.py (MeowModel)                # 神经网络模型（PyTorch）
-  ├── nn_model.py (ResidualMLP)         # 网络结构定义
-  └── eval.py (MeowEvaluator)           # 评估指标（Pearson / R² / MSE）
+meow.py (MeowEngine)                          # 入口调度器
+  ├── src/tradingcalendar.py (Calendar)       # 交易日历
+  ├── src/dl.py (MeowDataLoader)              # HDF5 数据加载
+  ├── src/feat.py (MeowFeatureGenerator)      # 特征工程（60+ 特征）
+  ├── src/mdl.py (MeowModel)                  # 神经网络模型（PyTorch）
+  ├── src/nn_model.py (ResidualMLP)           # 网络结构定义
+  └── src/eval.py (MeowEvaluator)             # 评估指标（Pearson / R² / MSE）
 ```
 
 整体流程：`MeowDataLoader.loadDates()` 加载指定日期范围的原始数据 → `MeowFeatureGenerator.genFeatures()` 生成特征矩阵 → `MeowModel.fit()` 训练神经网络 → `MeowModel.predict()` 推理 → `MeowEvaluator.eval()` 评估。
@@ -105,7 +105,7 @@ net_flow 为正表示买方限价单净增加，暗示买盘堆积，对价格�
 
 ### 2.5 滚动窗口时序统计（16 特征）
 
-捕捉特征的短期动态和波动率变化。使用 `feat.py` 中 `_rolling_mean()` 和 `_rolling_std()` 方法，底层调用 Pandas 原生 Cython 优化路径 `groupby(level=[0,1]).rolling()`，杜绝 Python lambda 遍历开销，确保约 700 万行数据的计算效率。
+捕捉特征的短期动态和波动率变化。使用 `src/feat.py` 中 `_rolling_mean()` 和 `_rolling_std()` 方法，底层调用 Pandas 原生 Cython 优化路径 `groupby(level=[0,1]).rolling()`，杜绝 Python lambda 遍历开销，确保约 700 万行数据的计算效率。
 
 | 特征 | 源特征 | 窗口 | 类型 |
 |------|--------|------|------|
@@ -131,7 +131,7 @@ net_flow 为正表示买方限价单净增加，暗示买盘堆积，对价格�
 
 ### 2.6 截面特征（5 特征）
 
-在每个时间截面上对特征做去均值处理，分离个股异质信号与市场共同信号。实现方式为 `feat.py` 中 `groupby("interval").transform("mean")`。
+在每个时间截面上对特征做去均值处理，分离个股异质信号与市场共同信号。实现方式为 `src/feat.py` 中 `groupby("interval").transform("mean")`。
 
 | 特征 | 含义 |
 |------|------|
@@ -156,7 +156,7 @@ lagret12 首先按股票分组计算过去 12 分钟收益率 `bret12`，再减�
 
 ### 2.8 特征稳定性处理
 
-所有分母添加 $10^{-8}$ 防除零。分组 shift 操作（如 `groupby(["symbol","date"]).shift()`）确保不跨日、不跨股票泄露未来信息。最终统一 `fillna(0)` 处理缺失值（主要来源于开盘前几分钟的滚动窗口不足）。实现见 `feat.py: MeowFeatureGenerator.genFeatures()`。
+所有分母添加 $10^{-8}$ 防除零。分组 shift 操作（如 `groupby(["symbol","date"]).shift()`）确保不跨日、不跨股票泄露未来信息。最终统一 `fillna(0)` 处理缺失值（主要来源于开盘前几分钟的滚动窗口不足）。实现见 `src/feat.py: MeowFeatureGenerator.genFeatures()`。
 
 ---
 
@@ -164,7 +164,7 @@ lagret12 首先按股票分组计算过去 12 分钟收益率 `bret12`，再减�
 
 ### 3.1 架构选择
 
-舍弃原始代码中的 Ridge 岭回归（`sklearn.linear_model.Ridge`），替换为 PyTorch 实现的多层感知机 ResidualMLP（`nn_model.py: ResidualMLP`）。网络结构：
+舍弃原始代码中的 Ridge 岭回归（`sklearn.linear_model.Ridge`），替换为 PyTorch 实现的多层感知机 ResidualMLP（`src/nn_model.py: ResidualMLP`）。网络结构：
 
 ```
 Input(N_feat) → Linear(N, 128) → BatchNorm → GELU → Dropout(0.2)
@@ -191,11 +191,11 @@ Input(N_feat) → Linear(N, 128) → BatchNorm → GELU → Dropout(0.2)
 
 ### 3.3 硬件兼容
 
-`nn_model.py` 模块级声明 `device = torch.device("cuda" if torch.cuda.is_available() else "cpu")`，模型通过 `.to(device)` 部署。既能在 GPU 服务器上全速运行，也能在纯 CPU 评测环境正常推理——满足课程评分时的兼容性要求。
+`src/nn_model.py` 模块级声明 `device = torch.device("cuda" if torch.cuda.is_available() else "cpu")`，模型通过 `.to(device)` 部署。既能在 GPU 服务器上全速运行，也能在纯 CPU 评测环境正常推理——满足课程评分时的兼容性要求。
 
 ### 3.4 训练策略
 
-训练逻辑见 `mdl.py: MeowModel.fit()`。
+训练逻辑见 `src/mdl.py: MeowModel.fit()`。
 
 **标签缩放**：fret12 均值约 0.0006，直接训练会导致梯度消失。训练时计算 `MSE(pred, y × 100)` 将目标放大 100 倍，推理时在 `MeowModel.predict()` 中将输出除以 100 还原。
 
@@ -215,7 +215,7 @@ Input(N_feat) → Linear(N, 128) → BatchNorm → GELU → Dropout(0.2)
 
 ### 4.1 模型持久化
 
-训练完成后自动保存两份文件（`mdl.py: MeowModel.fit()` 末尾）：
+训练完成后自动保存两份文件（`src/mdl.py: MeowModel.fit()` 末尾）：
 - `model_weights.pt`：PyTorch state_dict + 输入维度信息
 - `scaler.pkl`：sklearn StandardScaler，用于推理时特征标准化
 
@@ -229,7 +229,7 @@ Input(N_feat) → Linear(N, 128) → BatchNorm → GELU → Dropout(0.2)
 
 ### 4.4 预测结果输出
 
-`eval.py: MeowEvaluator.eval()` 在输出三个评估指标后，将预测值与真实值保存为 `predictions.csv`，包含 symbol、date、interval、forecast、fret12 五列，供误差分析和可视化使用。
+`src/eval.py: MeowEvaluator.eval()` 在输出三个评估指标后，将预测值与真实值保存为 `predictions.csv`，包含 symbol、date、interval、forecast、fret12 五列，供误差分析和可视化使用。
 
 ---
 
@@ -293,13 +293,13 @@ Pearson 相关系数从约 2.5% 提升至 **6.43%**，达到课程要求的 5-10
 | 文件 | 类/方法 | 职责 |
 |------|---------|------|
 | `meow.py` | `MeowEngine` | 入口调度，fit/eval 流程控制 |
-| `dl.py` | `MeowDataLoader` | HDF5 数据加载与拼接 |
-| `feat.py` | `MeowFeatureGenerator` | 62 个特征的计算 |
-| `nn_model.py` | `ResidualBlock`, `ResidualMLP` | 神经网络结构定义 |
-| `mdl.py` | `MeowModel` | 训练循环、标签缩放、模型持久化、分批推理 |
-| `eval.py` | `MeowEvaluator` | 评估指标计算 + CSV 输出 |
-| `tradingcalendar.py` | `Calendar` | 交易日历查询 |
-| `log.py` | `MeowLogger` | 日志输出 |
+| `src/dl.py` | `MeowDataLoader` | HDF5 数据加载与拼接 |
+| `src/feat.py` | `MeowFeatureGenerator` | 62 个特征的计算 |
+| `src/nn_model.py` | `ResidualBlock`, `ResidualMLP` | 神经网络结构定义 |
+| `src/mdl.py` | `MeowModel` | 训练循环、标签缩放、模型持久化、分批推理 |
+| `src/eval.py` | `MeowEvaluator` | 评估指标计算 + CSV 输出 |
+| `src/tradingcalendar.py` | `Calendar` | 交易日历查询 |
+| `src/log.py` | `MeowLogger` | 日志输出 |
 
 ---
 

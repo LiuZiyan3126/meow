@@ -21,15 +21,22 @@ python meow.py
 ## 项目结构
 
 ```
-meow.py                 # 入口调度器 (MeowEngine)
-nn_model.py             # ResidualMLP 网络结构定义
-mdl.py                  # 模型训练/推理包装器 (MeowModel)
-feat.py                 # 特征工程生成器 (MeowFeatureGenerator)
-dl.py                   # HDF5 数据加载器 (MeowDataLoader)
-eval.py                 # 评估器 (MeowEvaluator)
-tradingcalendar.py      # 交易日历
-log.py                  # 日志工具
-1.py                    # 可视化脚本（预测 vs 真实散点图）
+meow.py                    # 入口调度器 (MeowEngine)
+src/                       # 源码模块
+├── __init__.py
+├── nn_model.py            # ResidualMLP 网络结构定义
+├── mdl.py                 # 模型训练/推理包装器 (MeowModel)
+├── feat.py                # 特征工程生成器 (MeowFeatureGenerator)
+├── dl.py                  # HDF5 数据加载器 (MeowDataLoader)
+├── eval.py                # 评估器 (MeowEvaluator)
+├── tradingcalendar.py     # 交易日历
+└── log.py                 # 日志工具
+scripts/                   # 独立脚本
+├── 1.py                   # 可视化脚本（预测 vs 真实散点图）
+└── make_ppt.py            # PPT 生成脚本
+doc/                       # 文档与报告
+resources/                 # 资源文件（交易日历）
+archive/                   # HDF5 数据目录
 ```
 
 ## 方法概览
@@ -87,6 +94,8 @@ Pearson 达到课程预期 5-10% 区间，相较线性基线提升约 2.6 倍。
 
 ## 文档
 
-- [DESIGN.md](DESIGN.md) — 详细设计文档（特征公式、模型架构、创新点）
-- [CONTRIBUTION.md](CONTRIBUTION.md) — 小组成员分工
-- [实验报告.md](实验报告.md) — 课程实验报告
+- [doc/DESIGN.md](doc/DESIGN.md) — 详细设计文档（特征公式、模型架构、创新点）
+- [doc/CONTRIBUTION.md](doc/CONTRIBUTION.md) — 小组成员分工
+- [doc/实验报告.md](doc/实验报告.md) — 课程实验报告
+- [doc/升级方案.md](doc/升级方案.md) — 项目升级优化方案
+- [doc/模型选型与对比分析.md](doc/模型选型与对比分析.md) — 可用模型排名与分析

@@ -14,13 +14,13 @@
 
 ### 二、特征挖掘
 - 参与 7 大类 62 特征的体系框架讨论
-- 负责订单簿不平衡类（A 类 8 特征）和价差微观结构类（B 类 8 特征）的公式推导与代码编写（`feat.py`）
+- 负责订单簿不平衡类（A 类 8 特征）和价差微观结构类（B 类 8 特征）的公式推导与代码编写（`src/feat.py`）
 - 提出使用金额加权不平衡（ob_tr_imb）补充数量加权不平衡的方案，区分"有多少股"和"有多少资金"两种信号
 
 ### 三、模型定义
 - 参与 ResidualMLP 架构的三人讨论，共同确定隐藏层维度配置和残差连接方案
-- 编写 `nn_model.py` 全部代码：ResidualBlock 类与 ResidualMLP 类（AI 辅助生成样板代码框架，核心架构由本人设计）
-- 编写 `mdl.py` 训练管线核心代码：PyTorch 训练循环、AdamW 优化器与 ReduceLROnPlateau 调度器配置、早停与 checkpoint 恢复机制（AI 辅助生成训练循环模板）
+- 编写 `src/nn_model.py` 全部代码：ResidualBlock 类与 ResidualMLP 类（AI 辅助生成样板代码框架，核心架构由本人设计）
+- 编写 `src/mdl.py` 训练管线核心代码：PyTorch 训练循环、AdamW 优化器与 ReduceLROnPlateau 调度器配置、早停与 checkpoint 恢复机制（AI 辅助生成训练循环模板）
 - 提出并实现标签缩放方案（训练时 y×100 / 推理时 ÷100），解决 fret12 数值过小导致的梯度消失问题
 - 实现硬件自适应方案（`torch.device` GPU/CPU 自动检测）、分批推理管线（batch_size=8192 + `torch.no_grad()`）
 - 实现模型持久化机制（`MeowModel.load()` 与训练后自动保存），支持加载预训练权重跳过训练
@@ -37,7 +37,7 @@
 - 为汇报 PPT 提供"模型架构设计"与"训练系统"部分的素材与示意图
 
 ### AI 辅助说明
-- `nn_model.py` 和 `mdl.py` 中的训练循环模板、`.to(device)` 语句、torch.save 调用等样板代码由 AI 辅助生成
+- `src/nn_model.py` 和 `src/mdl.py` 中的训练循环模板、`.to(device)` 语句、torch.save 调用等样板代码由 AI 辅助生成
 - `DESIGN.md` 中部分章节的初稿和公式排版由 AI 辅助
 - 核心架构设计、标签缩放方案、残差连接配置、超参数范围确定均为本人提出
 
@@ -50,7 +50,7 @@
 
 ### 二、特征挖掘
 - 参与 7 大类 62 特征的体系框架讨论
-- 负责成交流特征类（C 类 10 特征）和委托/撤单动态类（D 类 10 特征）的公式推导与代码编写（`feat.py`）
+- 负责成交流特征类（C 类 10 特征）和委托/撤单动态类（D 类 10 特征）的公式推导与代码编写（`src/feat.py`）
 - 提出 trade_imb、trade_count_imb、trade_tvr_imb 三种维度（量/笔数/金额）的不平衡特征设计
 - 提出 net_flow（新增委托 − 撤单）作为衡量被动买卖意图变化的特征
 - 负责交互特征类（G 类 4 特征）的公式推导与代码编写，提出 trade_imb×spread 与 ob_imb0×midpx_ret1 的交互方案
@@ -66,7 +66,7 @@
 ### 四、结果评价
 - 参与评估指标（Pearson / R² / MSE）的结果验证
 - 主导消融实验：依次移除各特征类别，量化每类对 Pearson 的边际贡献（A 类 +1.5%、E 类 +1.2%、C 类 +0.8% 等）
-- 编写 `1.py` 可视化分析脚本（AI 辅助生成框架）：预测值 vs 真实值散点图、误差分布直方图
+- 编写 `scripts/1.py` 可视化分析脚本（AI 辅助生成框架）：预测值 vs 真实值散点图、误差分布直方图
 
 ### 五、协作与报告
 - 撰写 `DESIGN.md` 中"特征工程"章节（7 类特征公式表、经济学含义、消融分析结果）
@@ -74,7 +74,7 @@
 - 协助 PPT 中"数据分析"与"特征工程"部分的图表素材
 
 ### AI 辅助说明
-- 数据可视化脚本框架、消融实验统计计算、`feat.py` 滚动优化技术方案由 AI 辅助
+- 数据可视化脚本框架、消融实验统计计算、`src/feat.py` 滚动优化技术方案由 AI 辅助
 - 特征的经济学逻辑、窗口长度选择标准、消融实验设计由本人完成
 
 
@@ -86,7 +86,7 @@
 
 ### 二、特征挖掘
 - 参与 7 大类 62 特征的体系框架讨论
-- 负责滚动窗口时序统计类（E 类 16 特征）的公式推导与全部代码编写（`feat.py`）：11 个基础 rolling mean/std 特征 + 5 个衍生特征（vol_ratio5/12、spread_chg5、imb_chg5、ret_ma_accel）
+- 负责滚动窗口时序统计类（E 类 16 特征）的公式推导与全部代码编写（`src/feat.py`）：11 个基础 rolling mean/std 特征 + 5 个衍生特征（vol_ratio5/12、spread_chg5、imb_chg5、ret_ma_accel）
 - 负责截面特征类（F 类 5 特征）的公式推导与全部代码编写：cx_ret1、cx_relret1、cx_trade_imb、cx_ob_imb0、lagret12
 - 提出 vol_ratio（当前成交量/历史均值）作为成交量异常检测特征
 - 提出 ret_ma_accel（短期动量 − 长期动量）作为动量加速/减速指示器
@@ -102,8 +102,8 @@
 - 在自己的 RTX 4060 电脑上独立完成 GPU 训练环境部署：安装 PyTorch CUDA 版本、配置全部依赖（scikit-learn / pandas / tables / numpy），解决 CUDA 驱动兼容性问题
 - 执行全部训练实验：完整训练（6-11 月约 700 万样本）、超参数对比实验（10+ 组）、消融实验，监控并记录全部 train_loss / val_loss 曲线
 - 编写 `meow.py` 中预训练权重自动检测加载逻辑，实现演示模式
-- 实现预测结果导出功能（`eval.py` 末尾），将 forecast 与 fret12 保存为 `predictions.csv`
-- 实现模型保存逻辑（`mdl.py` 中 torch.save + pickle.dump），并验证权重文件可在纯 CPU 机器上复现推理
+- 实现预测结果导出功能（`src/eval.py` 末尾），将 forecast 与 fret12 保存为 `predictions.csv`
+- 实现模型保存逻辑（`src/mdl.py` 中 torch.save + pickle.dump），并验证权重文件可在纯 CPU 机器上复现推理
 
 ### 五、结果评价
 - 主导最终评估结果分析：Pearson 6.43% 相较基线 Ridge（2-3%）提升约 2.6 倍，达到课程 5-10% 区间要求
